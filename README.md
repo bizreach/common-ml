@@ -11,7 +11,21 @@ Please file an [issue](https://github.com/bizreach/common-ml/issues "issue").
 
 ## Getting Started
 
-### Install/Run Fess
+### Install common-ml
+
+    $ pip install common-ml
+
+## Document
+
+### Vectorizer
+
+TBD
+
+### Analyzer
+
+TBD
+
+### ChainerEstimator
 
 TBD
 
