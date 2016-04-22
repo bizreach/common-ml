@@ -21,17 +21,21 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
     def fit(self, raw_documents, y=None):
         for vect_rule in self.vect_rules:
             name = vect_rule.get('name')
-            vect = vect_rule.get('vectorizer')
             #logger.info(u'Fitting {0}'.format(name))
-            vect.fit(map(lambda x: get_nested_value(x, name, ''), raw_documents))
+            vect = vect_rule.get('vectorizer')
+            if not hasattr(vect, '__call__'):
+                vect.fit(map(lambda x: get_nested_value(x, name, ''), raw_documents))
 
     def transform(self, raw_documents):
         results = []
         for vect_rule in self.vect_rules:
             name = vect_rule.get('name')
-            vect = vect_rule.get('vectorizer')
             #logger.info(u'Transforming {0}'.format(name))
-            data = vect.transform(map(lambda x: get_nested_value(x, name, ''), raw_documents))
+            vect = vect_rule.get('vectorizer')
+            if hasattr(vect, '__call__'):
+                data = vect(map(lambda x: get_nested_value(x, name, ''), raw_documents))
+            else:
+                data = vect.transform(map(lambda x: get_nested_value(x, name, ''), raw_documents))
             results.append(data)
         return hstack(results, format='csr', dtype=np.float32)
 
