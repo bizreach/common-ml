@@ -50,30 +50,30 @@ and then start elasticsearch.
 To analyze texts, create elasticsearch's index with analyzers.
 
     $ curl -XPUT localhost:9200/.analyzer -d '
-　　　　{
-　　　　  "settings": {
-    　　　　"index": {
-      　　　　"analysis": {
-       　　　　 "tokenizer": {
-         　　　　 "kuromoji_neologd_tokenizer": {
-           　　　　 "discard_punctuation": "false",
-            　　　　"type": "kuromoji_neologd_tokenizer",
-           　　　　 "mode": "normal"
-          　　　　}
-　　　　        },
-    　　　　    "analyzer": {
-        　　　　  "kuromoji_neologd_analyzer": {
-            　　　　"tokenizer": "kuromoji_neologd_tokenizer",
-           　　　　 "type": "custom"
-　　　　          }
-    　　　　    }
-      　　　　},
-      　　　　"number_of_replicas": "0",
-　　　　      "number_of_shards": "10",
-    　　　　  "refresh_interval": "60s"
-　　　　    }
-  　　　　}
-　　　　}'
+    {
+      "settings": {
+        "index": {
+          "analysis": {
+            "tokenizer": {
+              "kuromoji_neologd_tokenizer": {
+                "discard_punctuation": "false",
+                "type": "kuromoji_neologd_tokenizer",
+                "mode": "normal"
+              }
+            },
+            "analyzer": {
+              "kuromoji_neologd_analyzer": {
+                "tokenizer": "kuromoji_neologd_tokenizer",
+                "type": "custom"
+              }
+            }
+          },
+          "number_of_replicas": "0",
+          "number_of_shards": "10",
+          "refresh_interval": "60s"
+        }
+      }
+    }'
 
 To check \_analyze\_api request, send the following request:
 
