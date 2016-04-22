@@ -21,9 +21,80 @@ Please file an [issue](https://github.com/bizreach/common-ml/issues "issue").
 
 TBD
 
-### Analyzer
+### EsAnalyzer/EsTextAnalyzer
 
-TBD
+EsAnalyzer nad EsTextAnalyzer analyze texts with Elasticsearch analysis feature.
+Therefore, in Python, you can use text analyzer you want.
+
+First of all, you need to setup elasticsearch,
+
+    $ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.1/elasticsearch-2.3.1.zip
+    $ unzip elasticsearch-2.3.1.zip
+    $ cd elasticsearch-2.3.1
+    $ echo 'cluster.name: es-ml' >> config/elasticsearch.yml
+    $ echo 'network.host: "0"' >> config/elasticsearch.yml
+    $ ./bin/plugin install org.codelibs/elasticsearch-analyze-api/2.3.0
+
+install analysis plugins you need,
+
+    $ ./bin/plugin install analysis-kuromoji
+    $ ./bin/plugin install analysis-icu
+    $ ./bin/plugin install org.codelibs/elasticsearch-analysis-synonym/2.3.0 -b
+    $ ./bin/plugin install org.codelibs/elasticsearch-analysis-ja/2.3.0 -b
+    $ ./bin/plugin install org.codelibs/elasticsearch-analysis-kuromoji-neologd/2.3.0 -b
+
+and then start elasticsearch.
+
+    $ ./bin/elasticsearch &
+
+To analyze texts, create elasticsearch's index with analyzers.
+
+    $ curl -XPUT localhost:9200/.analyzer -d '
+　　　　{
+　　　　  "settings": {
+    　　　　"index": {
+      　　　　"analysis": {
+       　　　　 "tokenizer": {
+         　　　　 "kuromoji_neologd_tokenizer": {
+           　　　　 "discard_punctuation": "false",
+            　　　　"type": "kuromoji_neologd_tokenizer",
+           　　　　 "mode": "normal"
+          　　　　}
+　　　　        },
+    　　　　    "analyzer": {
+        　　　　  "kuromoji_neologd_analyzer": {
+            　　　　"tokenizer": "kuromoji_neologd_tokenizer",
+           　　　　 "type": "custom"
+　　　　          }
+    　　　　    }
+      　　　　},
+      　　　　"number_of_replicas": "0",
+　　　　      "number_of_shards": "10",
+    　　　　  "refresh_interval": "60s"
+　　　　    }
+  　　　　}
+　　　　}'
+
+To check \_analyze\_api request, send the following request:
+
+    $ curl -XPOST "localhost:9200/.analyzer/_analyze_api?pretty&analyzer=kuromoji_neologd_analyzer&part_of_speech=true" -d'
+    {
+      "data":{
+        "text":"今日の天気は晴れです。"
+      }
+    }'
+
+If the above request is succeeded, you can analyze texts with EsTextAnalyzer in Python.
+
+    from commonml.text import EsAnalyzer, EsTextAnalyzer
+    
+    es_analyzer = EsAnalyzer(host='localhost:9200',
+                             index='.analyzer',
+                             analyzer='kuromoji_neologd_analyzer')
+    es_text_analyzer = EsTextAnalyzer(es_analyzer)
+    
+    for term in es_text_analyzer('今日の天気は晴れです。'):
+        print(term)
 
 ### ChainerEstimator
 
