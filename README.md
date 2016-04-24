@@ -17,13 +17,13 @@ Please file an [issue](https://github.com/bizreach/common-ml/issues "issue").
 
 ## Document
 
-### Vectorizer
+### CustomDictVectorizer
 
 TBD
 
-### EsAnalyzer/EsTextAnalyzer
+### ElasticsearchAnalyzer/ElasticsearchTextAnalyzer
 
-EsAnalyzer nad EsTextAnalyzer analyze texts with Elasticsearch analysis feature.
+ElasticsearchAnalyzer nad ElasticsearchTextAnalyzer analyze texts with Elasticsearch analysis feature.
 Therefore, in Python, you can use text analyzer you want.
 
 First of all, you need to setup elasticsearch,
@@ -84,17 +84,19 @@ To check \_analyze\_api request, send the following request:
       }
     }'
 
-If the above request is succeeded, you can analyze texts with EsTextAnalyzer in Python.
+If the above request is succeeded, you can analyze texts with ElasticsearchTextAnalyzer in Python.
 
-    from commonml.text import EsAnalyzer, EsTextAnalyzer
+    from commonml import es
     
-    es_analyzer = EsAnalyzer(host='localhost:9200',
-                             index='.analyzer',
-                             analyzer='kuromoji_neologd_analyzer')
-    es_text_analyzer = EsTextAnalyzer(es_analyzer)
+    analyzer_url = 'es://localhost:9200/.analyzer/kuromoji_neologd_analyzer'
+    es_analyzer = es.build_analyzer(analyzer_url)
     
     for term in es_text_analyzer('今日の天気は晴れです。'):
         print(term)
+
+### ElasticsearchReader
+
+TBD
 
 ### ChainerEstimator
 

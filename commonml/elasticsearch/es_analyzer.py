@@ -5,12 +5,12 @@ from logging import getLogger
 from elasticsearch import Elasticsearch
 
 
-logger = getLogger('commonml.text.analyzer')
+logger = getLogger('commonml.elasticsearch.es_analyzer')
 
 
 ANALYZER_CACHE = {}
 
-def build_analyzer(analyzer):
+def build_analyzer(analyzer, plain=True):
     if callable(analyzer):
         return analyzer
 
@@ -26,13 +26,15 @@ def build_analyzer(analyzer):
             host = u'https://{0}'.format(values[0])
         else:
             host = values[0]
-        cached = EsAnalyzer(host=host, index=values[1], analyzer=values[2])
+        cached = ElasticsearchAnalyzer(host=host, index=values[1], analyzer=values[2])
+        if plain:
+            cached = ElasticsearchTextAnalyzer(cached)
         ANALYZER_CACHE[analyzer] = cached
         return cached
 
     raise ValueError('%s is not implemented.' % analyzer)
 
-class EsAnalyzer:
+class ElasticsearchAnalyzer:
 
     def __init__(self, host, index, analyzer):
         self.es = Elasticsearch(hosts=host)
@@ -66,7 +68,7 @@ class EsAnalyzer:
         self.__dict__ = state
         self.es = Elasticsearch(hosts=self.host)
 
-class EsTextAnalyzer:
+class ElasticsearchTextAnalyzer:
 
     def __init__(self, es_analyzer):
         self.es_analyzer = es_analyzer

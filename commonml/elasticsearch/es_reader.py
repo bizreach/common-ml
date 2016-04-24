@@ -8,13 +8,13 @@ from commonml.utils import get_nested_value
 from elasticsearch.exceptions import NotFoundError
 
 
-logger = getLogger('commonml.text.elasticsearch_corpus')
+logger = getLogger('commonml.elasticsearch.es_reader')
 
 
 def flatmap(f, items):
     return chain.from_iterable(imap(f, items))
 
-class ElasticsearchCorpus(object):
+class ElasticsearchReader(object):
     
     def __init__(self,
                  index,
@@ -75,7 +75,7 @@ class ElasticsearchCorpus(object):
 
         logger.info('Loaded {0} documents.'.format(counter))
 
-class SentenceElasticsearchCorpus(object):
+class SentenceElasticsearchReader(object):
 
     def __init__(self, corpus, fields):
         self.corpus = corpus
