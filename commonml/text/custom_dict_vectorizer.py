@@ -39,6 +39,19 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
             results.append(data)
         return hstack(results, format='csr', dtype=np.float32)
 
+    def fit_transform(self, raw_documents, y=None):
+        results = []
+        for vect_rule in self.vect_rules:
+            name = vect_rule.get('name')
+            #logger.info(u'Transforming {0}'.format(name))
+            vect = vect_rule.get('vectorizer')
+            if hasattr(vect, '__call__'):
+                data = vect(map(lambda x: get_nested_value(x, name, ''), raw_documents))
+            else:
+                data = vect.fit_transform(map(lambda x: get_nested_value(x, name, ''), raw_documents))
+            results.append(data)
+        return hstack(results, format='csr', dtype=np.float32)
+
     def get_feature_names(self, append_name=True):
         results = []
         for vect_rule in self.vect_rules:
