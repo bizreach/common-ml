@@ -19,7 +19,27 @@ Please file an [issue](https://github.com/bizreach/common-ml/issues "issue").
 
 ### CustomDictVectorizer
 
-TBD
+CustomDictVectorizer transforms nested dictionary, such as JSON, to vectors.
+Unlike DictVectorizer, given properties are transformed with specified vectorizer or own function and then they are combined.
+
+    from commonml.text import CustomDictVectorizer
+
+    vect = CustomDictVectorizer(vect_rules=[
+                {'name': 'title',
+                 'vectorizer': CountVectorizer(tokenizer=analyzer,
+                                               max_df=0.8,
+                                               min_df=10,
+                                               dtype=np.float32)},
+                {'name': 'description',
+                 'vectorizer': CountVectorizer(tokenizer=analyzer,
+                                               max_df=0.8,
+                                               min_df=10,
+                                               dtype=np.float32)}
+               ])
+    X = vect.fit([
+                  {'title':'Test 1','description':'Aaa'},
+                  {'title':'Test 2','description':'Bbb'}
+                 ])
 
 ### ElasticsearchAnalyzer/ElasticsearchTextAnalyzer
 
@@ -96,7 +116,14 @@ If the above request is succeeded, you can analyze texts with ElasticsearchTextA
 
 ### ElasticsearchReader
 
-TBD
+ElasticsearchReader processes elasticsearch query and returns a list of dictionaries(JSON).
+
+    from commonml import es
+
+    list = es.reader(hosts=['localhost:9200'],
+                     index='test_index',
+                     source={"query":{"match_all":{}}})
+    # list is a list of dict(JSON) for document
 
 ### ChainerEstimator
 
