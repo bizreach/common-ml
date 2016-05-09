@@ -2,13 +2,9 @@
 
 from logging import getLogger
 
-from chainer import Link, Chain, ChainList
-from chainer import cuda, Function, gradient_check, Variable, optimizers, serializers, utils
-import chainer
+from chainer import Chain
 
 import chainer.functions as F
-import chainer.links as L
-import numpy as np
 
 
 logger = getLogger('commonml.sklearn.regressor')
@@ -24,6 +20,7 @@ class Regressor(Chain):
         y = self.predictor(x, train=train)
         self.loss = self.lossfun(y, t)
         return self.loss
+
 
 def mean_squared_error_regressor(predictor):
     return Regressor(predictor=predictor, lossfun=F.mean_squared_error)

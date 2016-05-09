@@ -6,8 +6,18 @@ from elasticsearch.exceptions import NotFoundError
 
 logger = getLogger('commonml.elasticsearch.reindex')
 
-# TODO remove scan query
-def reindex(from_hosts, from_index, to_hosts, to_index, to_type, source='{"query":{"match_all":{}}}', max_docs=0, page_size=10, logging_per_docs=1000, es_scroll='5m', request_timeout=60):
+
+def reindex(from_hosts,
+            from_index,
+            to_hosts,
+            to_index,
+            to_type,
+            source='{"query":{"match_all":{}}}',
+            max_docs=0,
+            page_size=10,
+            logging_per_docs=1000,
+            es_scroll='5m',
+            request_timeout=60):
 
     if from_index is None:
         logger.warn('from_index is empty.')
@@ -19,19 +29,19 @@ def reindex(from_hosts, from_index, to_hosts, to_index, to_type, source='{"query
     scroll_id = None
     counter = 0
     running = True
-    bulk_data = [] 
+    bulk_data = []
     while(running):
         try:
             if scroll_id is None:
                 response = from_es.search(index=from_index,
-                                          scroll=es_scroll,
-                                          size=page_size,
                                           body=source,
-                                          params={"request_timeout":request_timeout})
+                                          params={"request_timeout": request_timeout,
+                                                  "scroll": es_scroll,
+                                                  "size": page_size})
             else:
                 response = from_es.scroll(scroll_id=scroll_id,
-                                          scroll=es_scroll,
-                                          params={"request_timeout":request_timeout})
+                                          params={"request_timeout": request_timeout,
+                                                  "scroll": es_scroll})
             if len(response['hits']['hits']) == 0:
                 running = False
                 break
@@ -55,7 +65,7 @@ def reindex(from_hosts, from_index, to_hosts, to_index, to_type, source='{"query
                                       })
                     bulk_data.append(hit['_source'])
             if len(bulk_data) != 0:
-                to_es.bulk(body=bulk_data, params={"request_timeout":request_timeout})
+                to_es.bulk(body=bulk_data, params={"request_timeout": request_timeout})
                 bulk_data = []
         except NotFoundError:
             break
@@ -64,7 +74,6 @@ def reindex(from_hosts, from_index, to_hosts, to_index, to_type, source='{"query
             break
 
     if len(bulk_data) != 0:
-        to_es.bulk(body=bulk_data, params={"request_timeout":request_timeout})
+        to_es.bulk(body=bulk_data, params={"request_timeout": request_timeout})
 
     logger.info('Loaded {0} documents.'.format(counter))
-

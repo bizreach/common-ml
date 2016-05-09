@@ -1,7 +1,10 @@
 # coding: utf-8
+
 from logging import getLogger
 import os
 import time
+
+import six
 
 import numpy as np
 
@@ -9,7 +12,7 @@ import numpy as np
 logger = getLogger('commonml.utils')
 
 
-def get_nested_value(doc, field, default_value):
+def get_nested_value(doc, field, default_value=None):
     field_names = field.split('.')
     current_doc = doc
     for name in field_names[:-1]:
@@ -19,14 +22,14 @@ def get_nested_value(doc, field, default_value):
             current_doc = None
             break
     last_name = field_names[-1]
-    if current_doc != None and last_name in current_doc:
+    if current_doc is not None and last_name in current_doc:
         if isinstance(current_doc[last_name], list):
             return ' '.join(current_doc[last_name])
         return current_doc[last_name] if current_doc[last_name] is not None else default_value
     return default_value
 
 
-def text2bitarray(s, l=100):
+def text2bitarray(s, l=100, dtype=np.float32):
     result = []
     for c in list(s):
         bits = bin(ord(c))[2:]
@@ -35,6 +38,6 @@ def text2bitarray(s, l=100):
         l -= 1
         if l <= 0:
             break
-    for i in xrange(0, l):
-        result.append([0 for j in xrange(0, 24)])
-    return np.array(result, dtype=np.float32)
+    for _ in six.moves.range(0, l):
+        result.append(np.zeros(24))
+    return np.array(result, dtype=dtype)

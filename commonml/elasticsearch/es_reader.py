@@ -1,31 +1,30 @@
 # coding: utf-8
+
 import json
 from logging import getLogger
 
 from elasticsearch import Elasticsearch
 
-from commonml.utils import get_nested_value
 from elasticsearch.exceptions import NotFoundError
 
 
 logger = getLogger('commonml.elasticsearch.es_reader')
 
 
-def flatmap(f, items):
-    return chain.from_iterable(imap(f, items))
-
 class ElasticsearchReader(object):
-    
+
     def __init__(self,
                  index,
-                 hosts=['http://localhost:9200'],
-                 source='{"query":{"match_all":{}},"sort":[{"_id":{"order":"asc"}}]}',
+                 hosts=None,
+                 source='{"query":{"match_all":{}}}',
                  max_docs=0,
                  scroll_size=10,
                  scroll_time='5m',
                  request_timeout=600,
                  report=1000
                  ):
+        if hosts is None:
+            hosts = ['http://localhost:9200']
         self.index = index
         self.source = json.loads(source) if isinstance(source, str) else source
         self.max_docs = max_docs
@@ -43,15 +42,15 @@ class ElasticsearchReader(object):
             try:
                 if scroll_id is None:
                     response = self.es.search(index=self.index,
-                                              scroll=self.scroll_time,
-                                              size=self.scroll_size,
                                               body=self.source,
-                                              params={"request_timeout":self.request_timeout})
+                                              params={"request_timeout": self.request_timeout,
+                                                      "scroll": self.scroll_time,
+                                                      "size": self.scroll_size})
                     logger.info(u'{0} docs exist.'.format(response['hits']['total']))
                 else:
                     response = self.es.scroll(scroll_id=scroll_id,
-                                              scroll=self.scroll_time,
-                                              params={"request_timeout":self.request_timeout})
+                                              params={"request_timeout": self.request_timeout,
+                                                      "scroll": self.scroll_time})
                 if len(response['hits']['hits']) == 0:
                     running = False
                     break
@@ -60,37 +59,20 @@ class ElasticsearchReader(object):
                     if '_source' in hit:
                         counter += 1
                         if self.max_docs > 0 and counter >= self.max_docs:
-                            logger.info(u'{0} docs are loaded, but it exceeded {1} docs.'.format(counter, self.max_docs))
+                            logger.info(u'%d docs are loaded, but it exceeded %d docs.',
+                                        counter,
+                                        self.max_docs)
                             running = False
                             break
                         if counter % self.report == 0:
-                            logger.info(u'{0} docs are loaded.'.format(counter))
+                            logger.info(u'%d docs are loaded.', counter)
                         yield hit['_source']
             except NotFoundError:
-                logger.exception(u'NotFoundError: {0}'.format(hit))
+                logger.exception(u'NotFoundError: %d', hit)
                 break
             except:
-                logger.exception(u"Failed to load documents from Elasticsearch(Loaded {0} doc).".format(counter))
+                logger.exception(u"Failed to load documents from Elasticsearch(Loaded %d doc).",
+                                 counter)
                 break
 
-        logger.info('Loaded {0} documents.'.format(counter))
-
-class SentenceElasticsearchReader(object):
-
-    def __init__(self, corpus, fields):
-        self.corpus = corpus
-        self.fields = fields
-
-    def __iter__(self):
-        for source in self.corpus:
-            sentence_dict = {}
-            for field in self.fields:
-                text = get_nested_value(source, field)
-                if text is not None:
-                    count = 0
-                    for sentence in self._get_sentences(text):
-                        yield sentence
-
-    def _get_sentences(self, text):
-        # TODO remove Japanese characters
-        return flatmap(lambda x1:x1.split('。'), flatmap(lambda x2:x2.split('. '), [text]))
+        logger.info('Loaded %d documents.', counter)

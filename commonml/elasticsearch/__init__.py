@@ -1,15 +1,14 @@
 # coding: utf-8
 
 from commonml.elasticsearch import es_reader
+from commonml.elasticsearch import reindex
+from commonml.elasticsearch import es_analyzer
+
 reader = es_reader.ElasticsearchReader
 ElasticsearchReader = es_reader.ElasticsearchReader
-sentence_reader = es_reader.SentenceElasticsearchReader
-SentenceElasticsearchReader = es_reader.SentenceElasticsearchReader
 
-from commonml.elasticsearch import reindex
 reindex = reindex.reindex
 
-from commonml.elasticsearch import es_analyzer
 ElasticsearchAnalyzer = es_analyzer.ElasticsearchAnalyzer
 analyzer = es_analyzer.ElasticsearchAnalyzer
 ElasticsearchTextAnalyzer = es_analyzer.ElasticsearchTextAnalyzer

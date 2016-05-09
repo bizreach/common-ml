@@ -2,13 +2,9 @@
 
 from logging import getLogger
 
-from chainer import Link, Chain, ChainList
-from chainer import cuda, Function, gradient_check, Variable, optimizers, serializers, utils
-import chainer
+from chainer import Chain
 
 import chainer.functions as F
-import chainer.links as L
-import numpy as np
 
 
 logger = getLogger('commonml.sklearn.classifier')
@@ -25,17 +21,22 @@ class Classifier(Chain):
         self.loss = self.lossfun(y, t)
         return self.loss
 
+
 def softmax_classifier(predictor):
     return Classifier(predictor=predictor, lossfun=F.softmax)
+
 
 def softmax_cross_entropy_classifier(predictor):
     return Classifier(predictor=predictor, lossfun=F.softmax_cross_entropy)
 
+
 def hinge_classifier(predictor):
     return Classifier(predictor=predictor, lossfun=F.hinge)
 
+
 def sigmoid_classifier(predictor):
     return Classifier(predictor=predictor, lossfun=F.sigmoid)
+
 
 def sigmoid_cross_entropy_classifier(predictor):
     return Classifier(predictor=predictor, lossfun=F.sigmoid_cross_entropy)

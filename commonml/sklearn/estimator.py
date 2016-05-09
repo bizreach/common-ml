@@ -2,24 +2,26 @@
 
 from logging import getLogger
 
-import six
-
-from chainer import Link, Chain, ChainList
-from chainer import cuda, Function, gradient_check, Variable, optimizers, serializers, utils
-import chainer
-
-import chainer.functions as F
-import chainer.links as L
-import numpy as np
-from sklearn.base import BaseEstimator
+from chainer import cuda, Variable, optimizers
 from scipy.sparse.base import spmatrix
+import six
+from sklearn.base import BaseEstimator
+
+import numpy as np
+
 
 logger = getLogger('commonml.sklearn.estimator')
 
 
 class ChainerEstimator(BaseEstimator):
 
-    def __init__(self, model, optimizer=optimizers.SGD(), batch_size=100, n_epoch=20, report=10, gpu=-1, **params):
+    def __init__(self,
+                 model,
+                 optimizer=optimizers.SGD(),
+                 batch_size=100,
+                 n_epoch=20,
+                 report=10,
+                 gpu=-1):
         self.model = model
         if gpu >= 0:
             cuda.get_device(0).use()
@@ -44,7 +46,6 @@ class ChainerEstimator(BaseEstimator):
             logger.info(u'epoch {epoch}'.format(epoch=epoch))
             indexes = np.random.permutation(data_size)
             for i in six.moves.range(0, data_size, self.batch_size):
-                # logger.info(u'Processing data[{0}:{1}]'.format(i, i + self.batch_size))
                 x1 = X[indexes[i: i + self.batch_size]]
                 y1 = y[indexes[i: i + self.batch_size]]
                 if is_spmatrix:
@@ -56,8 +57,8 @@ class ChainerEstimator(BaseEstimator):
                 self.optimizer.update(self.model, x2, y2)
 
             if self.report > 0 and epoch % self.report == 0:
-                sum_loss, sum_accuracy = 0, 0
-                for i in six.moves.range(0, data_size, self.batch_size):
+                sum_loss = 0
+                for i in six.moves.range(0, data_size, self.sbatch_size):
                     x1 = X[indexes[i: i + self.batch_size]]
                     y1 = y[indexes[i: i + self.batch_size]]
                     if is_spmatrix:
@@ -69,7 +70,7 @@ class ChainerEstimator(BaseEstimator):
                     loss = self.model(x2, y2, train=False)
                     sum_loss += loss.data * len(x1)
                 mean_loss = sum_loss / data_size
-                logger.info(' -> loss {0}'.format(mean_loss))
+                logger.info(' -> loss %f', mean_loss)
 
     def predict(self, X):
         xp = np if self.gpu < 0 else cuda.cupy
@@ -88,6 +89,7 @@ class ChainerEstimator(BaseEstimator):
             if results is None:
                 results = cuda.to_cpu(pred.data)
             else:
-                results = np.concatenate((results, cuda.to_cpu(pred.data)), axis=0)
+                results = np.concatenate((results, cuda.to_cpu(pred.data)),
+                                         axis=0)
 
         return results
