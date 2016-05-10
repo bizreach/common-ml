@@ -8,7 +8,7 @@ from chainer import cuda, Variable
 import six
 
 import chainer.functions as F
-from commonml.sklearn import ChainerEstimator
+from commonml.sklearn.estimator import ChainerEstimator
 import numpy as np
 
 
