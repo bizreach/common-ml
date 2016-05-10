@@ -58,7 +58,7 @@ class ChainerEstimator(BaseEstimator):
 
             if self.report > 0 and epoch % self.report == 0:
                 sum_loss = 0
-                for i in six.moves.range(0, data_size, self.sbatch_size):
+                for i in six.moves.range(0, data_size, self.batch_size):
                     x1 = X[indexes[i: i + self.batch_size]]
                     y1 = y[indexes[i: i + self.batch_size]]
                     if is_spmatrix:
