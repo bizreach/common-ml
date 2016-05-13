@@ -111,7 +111,7 @@ If the above request is succeeded, you can analyze texts with ElasticsearchTextA
     analyzer_url = 'es://localhost:9200/.analyzer/kuromoji_neologd_analyzer'
     es_analyzer = es.build_analyzer(analyzer_url)
     
-    for term in es_text_analyzer('今日の天気は晴れです。'):
+    for term in es_analyzer('今日の天気は晴れです。'):
         print(term)
 
 ### ElasticsearchReader
