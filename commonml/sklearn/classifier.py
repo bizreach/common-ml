@@ -16,9 +16,10 @@ class Classifier(Chain):
         super(Classifier, self).__init__(predictor=predictor)
         self.lossfun = lossfun
         self.loss = None
+        self.has_train = 'train' in inspect.getargspec(self.predictor.__call__).args
 
     def __call__(self, x, t, train=True):
-        if 'train' in inspect.getargspec(self.predictor.__call__).args:
+        if self.has_train:
             y = self.predictor(x, train=train)
         else:
             y = self.predictor(x)
