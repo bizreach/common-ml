@@ -43,7 +43,7 @@ Unlike DictVectorizer, given properties are transformed with specified vectorize
 
 ### ElasticsearchAnalyzer/ElasticsearchTextAnalyzer
 
-ElasticsearchAnalyzer nad ElasticsearchTextAnalyzer analyze texts with Elasticsearch analysis feature.
+ElasticsearchAnalyzer and ElasticsearchTextAnalyzer analyze texts with Elasticsearch analysis feature.
 Therefore, in Python, you can use text analyzer you want.
 
 First of all, you need to setup elasticsearch,
