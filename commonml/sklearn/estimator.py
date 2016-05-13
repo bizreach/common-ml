@@ -43,7 +43,7 @@ class ChainerEstimator(BaseEstimator):
         data_size = X.shape[0] if is_spmatrix else len(X)
 
         for epoch in six.moves.range(self.n_epoch):
-            logger.info(u'epoch {epoch}'.format(epoch=epoch))
+            logger.info(u'epoch %d', epoch)
             indexes = np.random.permutation(data_size)
             for i in six.moves.range(0, data_size, self.batch_size):
                 x1 = X[indexes[i: i + self.batch_size]]

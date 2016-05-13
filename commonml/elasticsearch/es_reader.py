@@ -68,10 +68,10 @@ class ElasticsearchReader(object):
                             logger.info(u'%d docs are loaded.', counter)
                         yield hit['_source']
             except NotFoundError:
-                logger.exception(u'NotFoundError: %d', hit)
+                logger.exception(u'NotFoundError(Loaded %d docs)', counter)
                 break
             except:
-                logger.exception(u"Failed to load documents from Elasticsearch(Loaded %d doc).",
+                logger.exception(u"Failed to load documents from Elasticsearch(Loaded %d docs).",
                                  counter)
                 break
 
