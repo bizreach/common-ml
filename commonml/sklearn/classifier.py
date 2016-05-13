@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import inspect
 from logging import getLogger
 
 from chainer import Chain
@@ -17,7 +18,10 @@ class Classifier(Chain):
         self.loss = None
 
     def __call__(self, x, t, train=True):
-        y = self.predictor(x, train=train)
+        if 'train' in inspect.getargspec(self.predictor.__call__).args:
+            y = self.predictor(x, train=train)
+        else:
+            y = self.predictor(x)
         self.loss = self.lossfun(y, t)
         return self.loss
 

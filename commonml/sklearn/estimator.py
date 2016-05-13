@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import inspect
 from logging import getLogger
 
 from chainer import cuda, Variable, optimizers
@@ -78,6 +79,7 @@ class ChainerEstimator(BaseEstimator):
         is_spmatrix = isinstance(X, spmatrix)
         data_size = X.shape[0] if is_spmatrix else len(X)
 
+        has_train = 'train' in inspect.getargspec(self.model.predictor.__call__).args
         results = None
         for i in six.moves.range(0, data_size, self.batch_size):
             end = i + self.batch_size
@@ -85,7 +87,10 @@ class ChainerEstimator(BaseEstimator):
             if is_spmatrix:
                 x1 = x1.toarray()
             x2 = Variable(xp.asarray(x1))
-            pred = self.model.predictor(x2, train=False)
+            if has_train:
+                pred = self.model.predictor(x2, train=False)
+            else:
+                pred = self.model.predictor(x2)
             if results is None:
                 results = cuda.to_cpu(pred.data)
             else:

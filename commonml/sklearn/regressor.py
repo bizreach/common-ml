@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import inspect
 from logging import getLogger
 
 from chainer import Chain
@@ -15,9 +16,13 @@ class Regressor(Chain):
         super(Regressor, self).__init__(predictor=predictor)
         self.lossfun = lossfun
         self.loss = None
+        self.has_train = 'train' in inspect.getargspec(self.predictor.__call__).args
 
     def __call__(self, x, t, train=True):
-        y = self.predictor(x, train=train)
+        if self.has_train:
+            y = self.predictor(x, train=train)
+        else:
+            y = self.predictor(x)
         self.loss = self.lossfun(y, t)
         return self.loss
 
