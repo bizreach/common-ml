@@ -146,3 +146,25 @@ For example, [MNIST sample](https://github.com/pfnet/chainer/blob/master/example
     clf.fit(x_train, y_train)
     preds = clf.predict(x_test).argmax(axis=1) # [7, 2, 1, ..., 4, 5, 6]
 
+### AutoEncoder
+
+AutoEncoder is implemented as Vectorizer of scikit-learn.
+Therefore, you can put them into Pipeline.
+
+    from sklearn.pipeline import Pipeline
+    from commonml.sklearn import ChainerEstimator, MeanSquaredErrorRegressor, AutoEncoder
+    # 784 -> 1000 -> 1000 ->  1000 ->  1000 ->  10
+    clf = Pipeline([
+            ('ae1', AutoEncoder(784, 1000, MeanSquaredErrorRegressor, dropout_ratio=0,
+                                batch_size=batchsize, n_epoch=n_epoch, gpu=gpu)),
+            ('ae2', AutoEncoder(1000, 1000, MeanSquaredErrorRegressor, dropout_ratio=0,
+                                batch_size=batchsize, n_epoch=n_epoch, gpu=gpu)),
+            ('nn', ChainerEstimator(model=SoftmaxCrossEntropyClassifier(net.MnistMLP(1000, n_units, 10)),
+                                    optimizer=optimizers.Adam(),
+                                    batch_size=batchsize,
+                                    gpu=gpu,
+                                    n_epoch=n_epoch))
+          ])
+    clf.fit(x_train, y_train)
+
+
