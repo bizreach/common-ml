@@ -127,5 +127,22 @@ ElasticsearchReader processes elasticsearch query and returns a list of dictiona
 
 ### ChainerEstimator
 
-TBD
+ChainerEstimator provides fit/predict interface of scikit-learn, and will make your code simple.
+For example, [MNIST sample](https://github.com/pfnet/chainer/blob/master/examples/mnist/train_mnist.py) is abled to be replaced as below.
+
+    from commonml.sklearn import ChainerEstimator, SoftmaxCrossEntropyClassifier
+    ...
+    model = net.MnistMLP(784, n_units, 10)
+    if gpu >= 0:
+        cuda.get_device(gpu).use()
+        model.to_gpu()
+    xp = np if gpu < 0 else cuda.cupy
+
+    clf = ChainerEstimator(model=SoftmaxCrossEntropyClassifier(model),
+                           optimizer=optimizers.Adam(),
+                           batch_size=batchsize,
+                           gpu=gpu,
+                           n_epoch=n_epoch)
+    clf.fit(x_train, y_train)
+    preds = clf.predict(x_test).argmax(axis=1) # [7, 2, 1, ..., 4, 5, 6]
 
