@@ -40,6 +40,8 @@ class ChainerEstimator(BaseEstimator):
 
         xp = np if self.gpu < 0 else cuda.cupy
 
+        y = self.model.prefit_y(y)
+
         is_spmatrix = isinstance(X, spmatrix)
         data_size = X.shape[0] if is_spmatrix else len(X)
 
@@ -51,8 +53,11 @@ class ChainerEstimator(BaseEstimator):
                 y1 = y[indexes[i: i + self.batch_size]]
                 if is_spmatrix:
                     x1 = x1.toarray()
+                if x1.dtype != np.float32:
+                    x1 = x1.astype(np.float32)
                 if isinstance(y1, spmatrix):
                     y1 = y1.toarray()
+                y1 = self.model.astype_y(y1)
                 x2 = Variable(xp.asarray(x1))
                 y2 = Variable(xp.asarray(y1))
                 self.optimizer.update(self.model, x2, y2)
@@ -64,8 +69,11 @@ class ChainerEstimator(BaseEstimator):
                     y1 = y[indexes[i: i + self.batch_size]]
                     if is_spmatrix:
                         x1 = x1.toarray()
+                    if x1.dtype != np.float32:
+                        x1 = x1.astype(np.float32)
                     if isinstance(y1, spmatrix):
                         y1 = y1.toarray()
+                    y1 = self.model.astype_y(y1)
                     x2 = Variable(xp.asarray(x1))
                     y2 = Variable(xp.asarray(y1))
                     loss = self.model(x2, y2, train=False)
@@ -86,6 +94,8 @@ class ChainerEstimator(BaseEstimator):
             x1 = X[i: end if end < data_size else data_size]
             if is_spmatrix:
                 x1 = x1.toarray()
+            if x1.dtype != np.float32:
+                x1 = x1.astype(np.float32)
             x2 = Variable(xp.asarray(x1))
             if has_train:
                 pred = self.model.predictor(x2, train=False)
@@ -97,4 +107,4 @@ class ChainerEstimator(BaseEstimator):
                 results = np.concatenate((results, cuda.to_cpu(pred.data)),
                                          axis=0)
 
-        return results
+        return self.model.postpredict_y(results)
