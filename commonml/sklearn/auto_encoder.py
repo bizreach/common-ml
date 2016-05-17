@@ -35,44 +35,39 @@ class AutoEncoder(BaseEstimator, VectorizerMixin):
         self.optimizer = optimizer
         self.batch_size = batch_size
         self.gpu = gpu
-        self.n_epoch = n_epoch
-        self.report = report
-        self.regressor = regressor
-
-    def get_estimator(self):
-        return ChainerEstimator(model=self.regressor(self.model),
-                                optimizer=self.optimizer,
-                                batch_size=self.batch_size,
-                                gpu=self.gpu,
-                                report=self.report,
-                                n_epoch=self.n_epoch)
+        self.estimator = ChainerEstimator(model=regressor(self.model),
+                                          optimizer=self.optimizer,
+                                          batch_size=self.batch_size,
+                                          gpu=self.gpu,
+                                          report=report,
+                                          n_epoch=n_epoch)
 
     def fit(self, X, y=None):
-        estimator = self.get_estimator()
-        estimator.fit(X, X)
+        self.estimator.fit(X, X)
 
     def transform(self, X):
         xp = np if self.gpu < 0 else cuda.cupy
-        if isinstance(X, spmatrix):
-            data_size = X.shape[0]
-            indexes = np.random.permutation(data_size)
-            Y = None
-            for i in six.moves.range(0, data_size, self.batch_size):
-                X_sub = Variable(xp.asarray(X[indexes[i: i + self.batch_size]].toarray(), dtype=np.float32))
-                Y_sub = self.model.predict(X_sub)
-                if self.gpu >= 0:
-                    Y_sub.to_cpu()
-                Y_sub = Y_sub.data
-                if Y is None:
-                    Y = Y_sub
-                else:
-                    Y = np.r_[Y, Y_sub]
-            return Y
-        else:
-            Y = self.model.predict(Variable(xp.asarray(X)))
+        is_spmatrix = isinstance(X, spmatrix)
+
+        data_size = X.shape[0]
+        Y = None
+        for i in six.moves.range(0, data_size, self.batch_size):
+            end = i + self.batch_size
+            x1 = X[i: end if end < data_size else data_size]
+            if is_spmatrix:
+                x1 = x1.toarray()
+            if x1.dtype != np.float32:
+                x1 = x1.astype(np.float32)
+            X_sub = Variable(xp.asarray(x1))
+            Y_sub = self.model.predict(X_sub)
             if self.gpu >= 0:
-                Y.to_cpu()
-            return Y.data
+                Y_sub.to_cpu()
+            Y_sub = Y_sub.data
+            if Y is None:
+                Y = Y_sub
+            else:
+                Y = np.r_[Y, Y_sub]
+        return Y
 
     def fit_transform(self, X, y=None):
         self.fit(X, y)
