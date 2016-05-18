@@ -108,3 +108,16 @@ class ChainerEstimator(BaseEstimator):
                                          axis=0)
 
         return self.model.postpredict_y(results)
+
+    def score(self, X, y, sample_weight=None):
+        from commonml.sklearn.classifier import Classifier
+        from commonml.sklearn.regressor import Regressor
+        if isinstance(self.model, Classifier):
+            from sklearn.metrics.classification import accuracy_score
+            return accuracy_score(y, self.predict(X), sample_weight=sample_weight)
+        elif isinstance(self.model, Regressor):
+            from sklearn.metrics.regression import r2_score
+            return r2_score(y, self.predict(X), sample_weight=sample_weight,
+                            multioutput='variance_weighted')
+        else:
+            raise ValueError('Unsupported model.')
