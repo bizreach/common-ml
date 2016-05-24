@@ -34,6 +34,44 @@ class ChainerEstimator(BaseEstimator):
         self.batch_size = batch_size
         self.gpu = gpu
 
+    def update(self, X, y):
+        self.optimizer.update(self.model, X, y)
+
+    def var_x(self, x, xp):
+        if isinstance(x, spmatrix):
+            x = x.toarray()
+        if x.dtype != np.float32:
+            x = x.astype(np.float32)
+        return Variable(xp.asarray(x))
+
+    def var_y(self, y, xp):
+        if isinstance(y, spmatrix):
+            y = y.toarray()
+        y = self.model.astype_y(y)
+        return Variable(xp.asarray(y))
+
+    def evaluate_loss(self, X, y, has_train):
+        if has_train:
+            return self.model(X, y, train=False)
+        else:
+            return self.model(X, y)
+
+    def evaluate(self, X, y, indexes):
+        xp = np if self.gpu < 0 else cuda.cupy
+        is_spmatrix = isinstance(X, spmatrix)
+        data_size = X.shape[0] if is_spmatrix else len(X)
+        sum_loss = 0
+        has_train = 'train' in inspect.getargspec(self.model.predictor.__call__).args
+        for i in six.moves.range(0, data_size, self.batch_size):
+            end = i + self.batch_size
+            ids = indexes[i: end if end < data_size else data_size]
+            x2 = self.var_x(X[ids], xp)
+            y2 = self.var_y(y[ids], xp)
+            loss = self.evaluate_loss(x2, y2, has_train)
+            sum_loss += loss.data * len(ids)
+        mean_loss = sum_loss / data_size
+        logger.info(' -> loss %f', mean_loss)
+
     def fit(self, X, y=None):
         if y is None:
             raise ValueError('y is None.')
@@ -42,44 +80,26 @@ class ChainerEstimator(BaseEstimator):
 
         y = self.model.prefit_y(y)
 
-        is_spmatrix = isinstance(X, spmatrix)
-        data_size = X.shape[0] if is_spmatrix else len(X)
+        data_size = X.shape[0] if isinstance(X, spmatrix) else len(X)
 
         for epoch in six.moves.range(self.n_epoch):
             logger.info(u'epoch %d', epoch)
             indexes = np.random.permutation(data_size)
             for i in six.moves.range(0, data_size, self.batch_size):
-                x1 = X[indexes[i: i + self.batch_size]]
-                y1 = y[indexes[i: i + self.batch_size]]
-                if is_spmatrix:
-                    x1 = x1.toarray()
-                if x1.dtype != np.float32:
-                    x1 = x1.astype(np.float32)
-                if isinstance(y1, spmatrix):
-                    y1 = y1.toarray()
-                y1 = self.model.astype_y(y1)
-                x2 = Variable(xp.asarray(x1))
-                y2 = Variable(xp.asarray(y1))
-                self.optimizer.update(self.model, x2, y2)
+                end = i + self.batch_size
+                ids = indexes[i: end if end < data_size else data_size]
+                x2 = self.var_x(X[ids], xp)
+                y2 = self.var_y(y[ids], xp)
+                self.update(x2, y2)
 
             if self.report > 0 and epoch % self.report == 0:
-                sum_loss = 0
-                for i in six.moves.range(0, data_size, self.batch_size):
-                    x1 = X[indexes[i: i + self.batch_size]]
-                    y1 = y[indexes[i: i + self.batch_size]]
-                    if is_spmatrix:
-                        x1 = x1.toarray()
-                    if x1.dtype != np.float32:
-                        x1 = x1.astype(np.float32)
-                    if isinstance(y1, spmatrix):
-                        y1 = y1.toarray()
-                    y1 = self.model.astype_y(y1)
-                    x2 = Variable(xp.asarray(x1))
-                    y2 = Variable(xp.asarray(y1))
-                    loss = self.model(x2, y2, train=False)
-                    sum_loss += loss.data * len(x1)
-                mean_loss = sum_loss / data_size
-                logger.info(' -> loss %f', mean_loss)
+                self.evaluate(X, y, indexes)
+
+    def predict_on_predictor(self, X, has_train):
+        if has_train:
+            return self.model.predictor(X, train=False)
+        else:
+            return self.model.predictor(X)
 
     def predict(self, X):
         xp = np if self.gpu < 0 else cuda.cupy
@@ -91,16 +111,8 @@ class ChainerEstimator(BaseEstimator):
         results = None
         for i in six.moves.range(0, data_size, self.batch_size):
             end = i + self.batch_size
-            x1 = X[i: end if end < data_size else data_size]
-            if is_spmatrix:
-                x1 = x1.toarray()
-            if x1.dtype != np.float32:
-                x1 = x1.astype(np.float32)
-            x2 = Variable(xp.asarray(x1))
-            if has_train:
-                pred = self.model.predictor(x2, train=False)
-            else:
-                pred = self.model.predictor(x2)
+            x2 = self.var_x(X[i: end if end < data_size else data_size], xp)
+            pred = self.predict_on_predictor(x2, has_train)
             if results is None:
                 results = cuda.to_cpu(pred.data)
             else:
