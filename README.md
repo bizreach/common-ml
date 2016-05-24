@@ -36,10 +36,12 @@ Unlike DictVectorizer, given properties are transformed with specified vectorize
                                                min_df=10,
                                                dtype=np.float32)}
                ])
-    X = vect.fit([
+    X = vect.fit_transform([
                   {'title':'Test 1','description':'Aaa'},
                   {'title':'Test 2','description':'Bbb'}
                  ])
+
+See [notebook/text/custom_dict_vectorizer.ipynb](https://github.com/bizreach/common-ml/blob/master/notebook/text/custom_dict_vectorizer.ipynb).
 
 ### ElasticsearchAnalyzer/ElasticsearchTextAnalyzer
 
@@ -114,6 +116,8 @@ If the above request is succeeded, you can analyze texts with ElasticsearchTextA
     for term in es_analyzer('今日の天気は晴れです。'):
         print(term)
 
+See [notebook/elasticsearch/analyzer.ipynb](https://github.com/bizreach/common-ml/blob/master/notebook/elasticsearch/analyzer.ipynb).
+
 ### ElasticsearchReader
 
 ElasticsearchReader processes elasticsearch query and returns a list of dictionaries(JSON).
@@ -124,6 +128,8 @@ ElasticsearchReader processes elasticsearch query and returns a list of dictiona
                      index='test_index',
                      source={"query":{"match_all":{}}})
     # list is a list of dict(JSON) for document
+
+See [notebook/elasticsearch/reader.ipynb](https://github.com/bizreach/common-ml/blob/master/notebook/elasticsearch/reader.ipynb).
 
 ### ChainerEstimator
 
@@ -145,6 +151,8 @@ For example, [MNIST sample](https://github.com/pfnet/chainer/blob/master/example
                            n_epoch=n_epoch)
     clf.fit(x_train, y_train)
     preds = clf.predict(x_test).argmax(axis=1) # [7, 2, 1, ..., 4, 5, 6]
+
+See [notebook/sklearn](https://github.com/bizreach/common-ml/tree/master/notebook/sklearn).
 
 ### AutoEncoder
 
