@@ -4,6 +4,7 @@ import inspect
 from logging import getLogger
 
 from chainer import cuda, Variable, optimizers
+from cupy.cuda.runtime import CUDARuntimeError
 from scipy.sparse.base import spmatrix
 import six
 from sklearn.base import BaseEstimator
@@ -82,18 +83,29 @@ class ChainerEstimator(BaseEstimator):
 
         data_size = X.shape[0] if isinstance(X, spmatrix) else len(X)
 
-        for epoch in six.moves.range(self.n_epoch):
+        batch_size = self.batch_size
+        epoch = 0
+        while epoch < self.n_epoch:
             logger.info(u'epoch %d', epoch)
             indexes = np.random.permutation(data_size)
-            for i in six.moves.range(0, data_size, self.batch_size):
-                end = i + self.batch_size
-                ids = indexes[i: end if end < data_size else data_size]
-                x2 = self.var_x(X[ids], xp)
-                y2 = self.var_y(y[ids], xp)
-                self.update(x2, y2)
+            try:
+                for i in six.moves.range(0, data_size, batch_size):
+                    end = i + batch_size
+                    ids = indexes[i: end if end < data_size else data_size]
+                    x2 = self.var_x(X[ids], xp)
+                    y2 = self.var_y(y[ids], xp)
+                    self.update(x2, y2)
+            except CUDARuntimeError as e:
+                if 'out of memory' not in e.message:
+                    raise e
+                batch_size = int(batch_size * 0.8)
+                logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
+                continue
 
             if self.report > 0 and epoch % self.report == 0:
                 self.evaluate(X, y, indexes)
+
+            epoch += 1
 
     def predict_on_predictor(self, X, has_train):
         if has_train:
