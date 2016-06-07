@@ -60,7 +60,4 @@ def sigmoid_classifier(predictor):
 
 def sigmoid_cross_entropy_classifier(predictor):
     return Classifier(predictor=predictor,
-                      lossfun=F.sigmoid_cross_entropy,
-                      prefit_y=lambda y: y,
-                      astype_y=lambda y: y.astype(np.int32) if y.dtype != np.int32 else y,
-                      postpredict_y=lambda y: y.argmax(axis=1))
+                      lossfun=F.sigmoid_cross_entropy)
