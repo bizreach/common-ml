@@ -98,6 +98,11 @@ class ChainerEstimator(BaseEstimator):
             except CUDARuntimeError as e:
                 if 'out of memory' not in e.message:
                     raise e
+                # TODO clear GPU memory
+                if x2 is not None:
+                    x2.to_cpu()
+                if y2 is not None:
+                    y2.to_cpu()
                 batch_size = int(batch_size * 0.8)
                 logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
                 continue
@@ -136,6 +141,9 @@ class ChainerEstimator(BaseEstimator):
             except CUDARuntimeError as e:
                 if 'out of memory' not in e.message:
                     raise e
+                # TODO clear GPU memory
+                if x2 is not None:
+                    x2.to_cpu()
                 results = None
                 batch_size = int(batch_size * 0.8)
                 logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
