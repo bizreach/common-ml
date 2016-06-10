@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="common-ml",
-    version="0.0.5.dev1",
+    version="0.0.5",
     packages=['commonml',
               'commonml.sklearn',
               'commonml.elasticsearch',
