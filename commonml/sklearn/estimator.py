@@ -4,7 +4,6 @@ import inspect
 from logging import getLogger
 
 from chainer import cuda, Variable, optimizers
-from cupy.cuda.runtime import CUDARuntimeError
 from scipy.sparse.base import spmatrix
 import six
 from sklearn.base import BaseEstimator
@@ -95,7 +94,7 @@ class ChainerEstimator(BaseEstimator):
                     x2 = self.var_x(X[ids], xp)
                     y2 = self.var_y(y[ids], xp)
                     self.update(x2, y2)
-            except CUDARuntimeError as e:
+            except RuntimeError as e:
                 if 'out of memory' not in e.message:
                     raise e
                 # TODO clear GPU memory
@@ -138,7 +137,7 @@ class ChainerEstimator(BaseEstimator):
                     else:
                         results = np.concatenate((results, cuda.to_cpu(pred.data)),
                                                  axis=0)
-            except CUDARuntimeError as e:
+            except RuntimeError as e:
                 if 'out of memory' not in e.message:
                     raise e
                 # TODO clear GPU memory
