@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="common-ml",
-    version="0.0.5",
+    version="0.0.6.dev1",
     packages=['commonml',
               'commonml.sklearn',
               'commonml.elasticsearch',
@@ -16,7 +16,7 @@ setup(
     description=("Common Machine Learning Library"),
     keywords="machine learning",
     url="https://github.com/bizreach/common-ml",
-    download_url='https://github.com/bizreach/common-ml/tarball/0.0.5',
+    download_url='https://github.com/bizreach/common-ml/tarball/0.0.6',
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Topic :: Utilities",
