@@ -4,13 +4,14 @@ from setuptools import setup
 
 setup(
     name="common-ml",
-    version="0.0.4.dev1",
+    version="0.0.4",
     packages=['commonml',
               'commonml.sklearn',
               'commonml.elasticsearch',
               'commonml.text',
               'commonml.utils'],
-    author="BizReach, Inc.",
+    author="Shinsuke Sugaya",
+    author_email="shinsuke.sugaya@bizreach.co.jp",
     license="Apache Software License",
     description=("Common Machine Learning Library"),
     keywords="machine learning",
