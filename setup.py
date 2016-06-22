@@ -22,4 +22,8 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: Apache Software License",
     ],
+    install_requires=[
+        'elasticsearch>=2.0.0,<3.0.0',
+        'scikit-learn>=0.17'
+    ],
 )
