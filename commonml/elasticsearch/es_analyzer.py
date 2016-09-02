@@ -56,10 +56,19 @@ class ElasticsearchAnalyzer:
             params.update(request_params)
         transport = self.es.indices.client.transport
         path = '/{}/_analyze_api'.format(self.index)
-        http_status, data = transport.perform_request('GET',
-                                                      path,
-                                                      params=params,
-                                                      body=text_data)
+        response = transport.perform_request('GET',
+                                             path,
+                                             params=params,
+                                             body=text_data)
+        if isinstance(response, tuple):
+            http_status = response[0]
+            data = response[1]
+        elif isinstance(response, dict):
+            http_status = 200
+            data = response
+        else:
+            raise IOError(u'Unknown response: {0}'
+                          .format(str(response)))
 
         if http_status != 200:
             raise IOError(u'Failed to parse text: {0} => {1}'
