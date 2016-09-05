@@ -2,6 +2,7 @@
 
 from logging import getLogger
 import re
+import six
 
 from sklearn.base import BaseEstimator
 
@@ -39,7 +40,7 @@ class VocabularyTransformer(BaseEstimator):
         self.index2word = {}
         self.word2index[''] = 0
         self.index2word[0] = ''
-        for token, count in sorted(vocabulary.items(), key=lambda x: x[1], reverse=True):
+        for token, count in sorted(six.iteritems(vocabulary), key=lambda x: x[1], reverse=True):
             if count > self.min_frequency:
                 idx = len(self.word2index) + 1
                 self.word2index[token] = idx
@@ -72,7 +73,7 @@ class VocabularyTransformer(BaseEstimator):
         return self.transform(raw_documents)
 
     def get_feature_names(self):
-        return self.word2index.keys()
+        return list(six.iterkeys(self.word2index))
 
     def inverse_transform(self, X):
         return [[self.index2word.get(idx) for idx in x] for x in X]
