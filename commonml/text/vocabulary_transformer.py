@@ -42,7 +42,7 @@ class VocabularyTransformer(BaseEstimator):
         self.index2word[0] = ''
         for token, count in sorted(six.iteritems(vocabulary), key=lambda x: x[1], reverse=True):
             if count > self.min_frequency:
-                idx = len(self.word2index) + 1
+                idx = len(self.word2index)
                 self.word2index[token] = idx
                 self.index2word[idx] = token
 
