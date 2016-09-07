@@ -6,14 +6,14 @@ import numpy as np
 
 class XyDataset(object):
 
-    def __init__(self, X, y=None, astype_y=None):
+    def __init__(self, model, X, y=None):
         if X is None:
             raise ValueError('no X are given')
         length = X.shape[0] if isinstance(X, spmatrix) else len(X)
+        self.model = model
         self.X = X
-        self.y = y
+        self.y = model.prefit_y(y) if y is not None else None
         self._length = length
-        self.astype_y = astype_y
 
     def __getitem__(self, index):
         X_sub = self.X[index]
@@ -29,8 +29,8 @@ class XyDataset(object):
             y_sub = self.y[index]
             if isinstance(y_sub, spmatrix):
                 y_sub = y_sub.toarray()
-            if self.astype_y is not None:
-                y_sub = self.astype_y(y_sub)
+            if self.model.astype_y is not None:
+                y_sub = self.model.astype_y(y_sub)
 
             return [tuple([X_sub[i], y_sub[i]])
                     for i in six.moves.range(length)] if is_slice else tuple([X_sub, y_sub])

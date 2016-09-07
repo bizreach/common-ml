@@ -9,7 +9,7 @@ import chainer.functions as F
 import numpy as np
 
 
-logger = getLogger('commonml.sklearn.chainer.regressor')
+logger = getLogger('commonml.skchainer.regressor')
 
 
 class Regressor(Chain):

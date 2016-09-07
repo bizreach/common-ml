@@ -11,7 +11,7 @@ from sklearn.base import BaseEstimator
 import numpy as np
 
 
-logger = getLogger('commonml.sklearn.estimator')
+logger = getLogger('commonml.skchainer.estimator')
 
 
 class ChainerEstimator(BaseEstimator):
@@ -41,7 +41,7 @@ class ChainerEstimator(BaseEstimator):
         from commonml.skchainer import XyDataset
 
         batch_size = self.batch_size
-        dataset = XyDataset(X=X, y=y, astype_y=self.model.astype_y)
+        dataset = XyDataset(X=X, y=y, model=self.model)
         while True:
             try:
                 dataset_iter = iterators.SerialIterator(dataset, self.batch_size)
@@ -75,7 +75,7 @@ class ChainerEstimator(BaseEstimator):
 
         results = None
         batch_size = self.batch_size
-        dataset = XyDataset(X=X)
+        dataset = XyDataset(X=X, model=self.model)
         while True:
             try:
                 dataset_iter = iterators.SerialIterator(dataset, self.batch_size, repeat=False, shuffle=False)
@@ -99,8 +99,8 @@ class ChainerEstimator(BaseEstimator):
         return self.model.postpredict_y(results)
 
     def score(self, X, y, sample_weight=None):
-        from commonml.sklearn.classifier import Classifier
-        from commonml.sklearn.regressor import Regressor
+        from commonml.skchainer.classifier import Classifier
+        from commonml.skchainer.regressor import Regressor
         if isinstance(self.model, Classifier):
             from sklearn.metrics.classification import accuracy_score
             return accuracy_score(y, self.predict(X), sample_weight=sample_weight)
