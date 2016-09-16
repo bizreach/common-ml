@@ -34,30 +34,42 @@ class ChainerEstimator(BaseEstimator):
         self.device = device
         self.out = out
 
-    def fit(self, X, y=None, extensions=None):
+    def fit(self, X, y=None,
+            dataset_creator=None,
+            extender=None,
+            iterator=iterators.SerialIterator,
+            updater=training.StandardUpdater):
         if y is None:
             raise ValueError('y is None.')
 
-        from commonml.skchainer import XyDataset
+        if dataset_creator is None:
+            from commonml.skchainer import XyDataset
+            dataset_creator = XyDataset
 
         batch_size = self.batch_size
-        dataset = XyDataset(X=X, y=y, model=self.model)
+        dataset = dataset_creator(X=X, y=y, model=self.model)
         while True:
             try:
-                dataset_iter = iterators.SerialIterator(dataset, self.batch_size)
-                updater = training.StandardUpdater(dataset_iter, self.optimizer, device=self.device)  # ParallelUpdater
-                trainer = training.Trainer(updater, self.stop_trigger, out='result')
+                dataset_iter = iterator(dataset,
+                                        self.batch_size)
+                trainer = training.Trainer(updater(dataset_iter,
+                                                   self.optimizer,
+                                                   device=self.device),
+                                           self.stop_trigger,
+                                           out=self.out)
 
-                if extensions is None:
-                    extensions = [ProgressBar()]
-                for extension in extensions:
-                    trainer.extend(extension)
+                if extender is None:
+                    trainer.extend(ProgressBar())
+                else:
+                    extender(trainer)
                 trainer.run()
                 break
             except RuntimeError as e:
                 if 'out of memory' not in e.message:
                     raise e
                 batch_size = int(batch_size * 0.8)
+                if batch_size == 0:
+                    raise e
                 logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
                 continue
 
@@ -92,6 +104,8 @@ class ChainerEstimator(BaseEstimator):
                     raise e
                 results = None
                 batch_size = int(batch_size * 0.8)
+                if batch_size == 0:
+                    raise e
                 logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
                 continue
             break
