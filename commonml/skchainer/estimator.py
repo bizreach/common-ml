@@ -70,12 +70,17 @@ class ChainerEstimator(BaseEstimator):
                 batch_size = int(batch_size * 0.8)
                 if batch_size == 0:
                     raise e
-                logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
+                logger.warn('Memory shortage. batch_size is changed to %d', batch_size)
                 continue
 
-    def predict(self, X, converter=convert.concat_examples):
+    def predict(self, X,
+                dataset_creator=None,
+                iterator=lambda x, s: iterators.SerialIterator(x, s, repeat=False, shuffle=False),
+                converter=convert.concat_examples):
 
-        from commonml.skchainer import XyDataset
+        if dataset_creator is None:
+            from commonml.skchainer import XyDataset
+            dataset_creator = XyDataset
 
         has_train = 'train' in inspect.getargspec(self.model.predictor.__call__).args
 
@@ -87,10 +92,11 @@ class ChainerEstimator(BaseEstimator):
 
         results = None
         batch_size = self.batch_size
-        dataset = XyDataset(X=X, model=self.model)
+        dataset = dataset_creator(X=X, model=self.model)
         while True:
             try:
-                dataset_iter = iterators.SerialIterator(dataset, self.batch_size, repeat=False, shuffle=False)
+                dataset_iter = iterator(dataset,
+                                        self.batch_size)
                 for batch in dataset_iter:
                     in_arrays = converter(batch, self.device)
                     pred = predict_on_predictor(in_arrays[0])
@@ -106,7 +112,7 @@ class ChainerEstimator(BaseEstimator):
                 batch_size = int(batch_size * 0.8)
                 if batch_size == 0:
                     raise e
-                logger.warn(u'Memory shortage. batch_size is changed to %d', batch_size)
+                logger.warn('Memory shortage. batch_size is changed to %d', batch_size)
                 continue
             break
 
