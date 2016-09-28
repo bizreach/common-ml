@@ -7,6 +7,7 @@ setup(
     version="0.0.7.dev1",
     packages=['commonml',
               'commonml.sklearn',
+              'commonml.skchainer',
               'commonml.elasticsearch',
               'commonml.text',
               'commonml.utils'],
