@@ -23,8 +23,6 @@ def get_nested_value(doc, field, default_value=None):
             break
     last_name = field_names[-1]
     if current_doc is not None and last_name in current_doc:
-        if isinstance(current_doc[last_name], list):
-            return ' '.join(current_doc[last_name])
         return current_doc[last_name] if current_doc[last_name] is not None else default_value
     return default_value
 
