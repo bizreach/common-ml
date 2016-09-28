@@ -13,6 +13,15 @@ import numpy as np
 logger = getLogger('commonml.text.custom_dict_vectorizer')
 
 
+def get_nested_str_value(doc, field, default_value=None):
+    value = get_nested_value(doc, field, None)
+    if value is None:
+        return default_value
+    if isinstance(value, list):
+        return ' '.join(value)
+    return value
+
+
 class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
 
     def __init__(self, vect_rules):
@@ -23,7 +32,7 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
             name = vect_rule.get('name')
             vect = vect_rule.get('vectorizer')
             if not hasattr(vect, '__call__'):
-                vect.fit([get_nested_value(x, name, '') for x in raw_documents])
+                vect.fit([get_nested_str_value(x, name, '') for x in raw_documents])
 
     def transform(self, raw_documents):
         results = []
@@ -31,9 +40,9 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
             name = vect_rule.get('name')
             vect = vect_rule.get('vectorizer')
             if hasattr(vect, '__call__'):
-                data = vect([get_nested_value(x, name, '') for x in raw_documents])
+                data = vect([get_nested_str_value(x, name, '') for x in raw_documents])
             else:
-                data = vect.transform([get_nested_value(x, name, '') for x in raw_documents])
+                data = vect.transform([get_nested_str_value(x, name, '') for x in raw_documents])
             results.append(data)
         return hstack(results, format='csr', dtype=np.float32)
 
@@ -43,9 +52,9 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
             name = vect_rule.get('name')
             vect = vect_rule.get('vectorizer')
             if hasattr(vect, '__call__'):
-                data = vect([get_nested_value(x, name, '') for x in raw_documents])
+                data = vect([get_nested_str_value(x, name, '') for x in raw_documents])
             else:
-                data = vect.fit_transform([get_nested_value(x, name, '') for x in raw_documents])
+                data = vect.fit_transform([get_nested_str_value(x, name, '') for x in raw_documents])
             results.append(data)
         return hstack(results, format='csr', dtype=np.float32)
 
