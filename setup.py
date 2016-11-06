@@ -9,15 +9,16 @@ setup(
               'commonml.sklearn',
               'commonml.skchainer',
               'commonml.elasticsearch',
+              'commonml.runner',
               'commonml.text',
               'commonml.utils'],
-    author="Shinsuke Sugaya",
+    author="BizReach AI Team",
     author_email="shinsuke.sugaya@bizreach.co.jp",
     license="Apache Software License",
     description=("Common Machine Learning Library"),
     keywords="machine learning",
     url="https://github.com/bizreach/common-ml",
-    download_url='https://github.com/bizreach/common-ml/tarball/0.0.7',
+    download_url='https://github.com/bizreach/common-ml/tarball/0.0.8',
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
@@ -26,8 +27,9 @@ setup(
         "License :: OSI Approved :: Apache Software License",
     ],
     install_requires=[
-        'elasticsearch>=2.0.0,<3.0.0',
+        'elasticsearch>=2.0.0',
         'scikit-learn>=0.17',
-        'six'
+        'six',
+        'pyyaml'
     ],
 )

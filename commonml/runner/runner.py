@@ -3,7 +3,6 @@
 from argparse import ArgumentParser
 import json
 from logging import basicConfig, getLogger
-import sys
 
 import yaml
 
@@ -23,7 +22,8 @@ def invoke_function(default_config, local_config):
     names = function_name.split('.')
     command_func = 'import json\n'
     learner_config = {}
-    learner_config.update(default_config)
+    if default_config is not None:
+        learner_config.update(default_config)
     learner_config.update(local_config)
     command_func += 'learner_config = json.loads("' + json.dumps(learner_config).replace('\\', '\\\\').replace('"', '\\"') + '")\n'
     if len(names) == 1:
@@ -33,10 +33,10 @@ def invoke_function(default_config, local_config):
     exec(command_func)
 
 
-def run():
+def run(config_file='config.yml'):
     parser = ArgumentParser(description='Learner Framework invokes Machine Learning actions.')
     parser.add_argument('command', default='default')
-    parser.add_argument('--config', dest='config_file', default='config.yml')
+    parser.add_argument('--config', dest='config_file', default=config_file)
     options = parser.parse_args()
 
     config = load_config(options.config_file)
@@ -55,4 +55,3 @@ def run():
         return invoke_function(config.get('default'), config.get(options.command))
     else:
         raise ValueError('{} is not found.'.format(options.command))
-
