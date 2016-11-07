@@ -15,6 +15,17 @@ def load_config(config_file):
         raise ValueError('{} is unsupported'.format(config_file))
 
 
+def dict_merge(x, y):
+    merged = dict(x, **y)
+
+    xkeys = x.keys()
+    for key in xkeys:
+        if isinstance(x[key], dict) and key in y:
+            merged[key] = dict_merge(x[key], y[key])
+
+    return merged
+
+
 def invoke_function(default_config, local_config):
     function_name = local_config.pop('function')
     if function_name is None:
@@ -24,7 +35,7 @@ def invoke_function(default_config, local_config):
     learner_config = {}
     if default_config is not None:
         learner_config.update(default_config)
-    learner_config.update(local_config)
+    learner_config = dict_merge(learner_config, local_config)
     command_func += 'learner_config = json.loads("' + json.dumps(learner_config).replace('\\', '\\\\').replace('"', '\\"') + '")\n'
     if len(names) == 1:
         command_func += 'import ' + names[0] + '\n' + names[0] + '(learner_config)'
