@@ -85,12 +85,15 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
         results = []
         for vect_rule in self.vect_rules:
             vect = vect_rule.get('vectorizer')
-            if append_name:
-                name = vect_rule.get('name')
-                names = [u'{0}={1}'.format(name, x) for x in vect.get_feature_names()]
+            if hasattr(vect, '__call__'):
+                results.append(vect_rule.get('name'))
             else:
-                names = vect.get_feature_names()
-            results.extend(names)
+                if append_name:
+                    name = vect_rule.get('name')
+                    names = [u'{0}={1}'.format(name, x) for x in vect.get_feature_names()]
+                else:
+                    names = vect.get_feature_names()
+                results.extend(names)
         return results
 
     def get_feature_size(self):
