@@ -75,7 +75,7 @@ class ChainerEstimator(BaseEstimator):
 
     def predict(self, X,
                 dataset_creator=None,
-                iterator=lambda x, s: iterators.SerialIterator(x, s, repeat=False, shuffle=False),
+                iterator=lambda x, s: iterators.SerialIterator(x, s if s < len(x) else len(x), repeat=False, shuffle=False),
                 converter=convert.concat_examples):
 
         if dataset_creator is None:

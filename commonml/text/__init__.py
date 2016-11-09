@@ -4,4 +4,5 @@ from commonml.text import custom_dict_vectorizer
 from commonml.text import vocabulary_transformer
 
 CustomDictVectorizer = custom_dict_vectorizer.CustomDictVectorizer
+build_custom_vectorizer = custom_dict_vectorizer.build_custom_vectorizer
 VocabularyTransformer = vocabulary_transformer.VocabularyTransformer
