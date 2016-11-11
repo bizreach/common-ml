@@ -17,13 +17,17 @@ class XyDataset(object):
         self._length = length
 
     def __getitem__(self, index):
+        is_slice = isinstance(index, slice)
+        if is_slice:
+            size = self.X.shape[0]
+            if size < index.stop:
+                index = slice(index.start, size, index.step)
         X_sub = self.X[index]
         if isinstance(X_sub, spmatrix):
             X_sub = X_sub.toarray()
         if X_sub.dtype != self.X_dtype:
             X_sub = X_sub.astype(self.X_dtype)
 
-        is_slice = isinstance(index, slice)
         length = len(X_sub) if is_slice else 1
 
         if self.y is not None:
