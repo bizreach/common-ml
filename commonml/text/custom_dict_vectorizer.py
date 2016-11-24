@@ -17,6 +17,7 @@ import json
 
 logger = getLogger('commonml.text.custom_dict_vectorizer')
 
+
 class NumberPaththroughVectorizer(object):
 
     def __init__(self, dtype):
@@ -41,14 +42,18 @@ class NumberPaththroughVectorizer(object):
         # TODO what do i return
         return self.vocabulary_
 
+
 class ExtendedLabelBinarizer(LabelBinarizer):
 
-    def __init__(self, neg_label=0, pos_label=1, sparse_output=False, labelindex_path=None):
-        super(ExtendedLabelBinarizer, self).__init__(neg_label, pos_label, sparse_output)
+    def __init__(self, neg_label=0, pos_label=1,
+          sparse_output=False, labelindex_path=None):
+        super(ExtendedLabelBinarizer, self) \
+          .__init__(neg_label, pos_label, sparse_output)
         self.labelindex_path = labelindex_path
         if self.labelindex_path is not None:
             with open(self.labelindex_path, 'r') as f:
                 self.labelindex = json.load(f)
+
     def fit(self, y):
         if self.labelindex_path is not None:
             super(ExtendedLabelBinarizer, self).fit(self.labelindex)
