@@ -46,9 +46,9 @@ class NumberPaththroughVectorizer(object):
 class ExtendedLabelBinarizer(LabelBinarizer):
 
     def __init__(self, neg_label=0, pos_label=1,
-          sparse_output=False, labelindex_path=None):
+                 sparse_output=False, labelindex_path=None):
         super(ExtendedLabelBinarizer, self) \
-          .__init__(neg_label, pos_label, sparse_output)
+            .__init__(neg_label, pos_label, sparse_output)
         self.labelindex_path = labelindex_path
         if self.labelindex_path is not None:
             with open(self.labelindex_path, 'r') as f:
