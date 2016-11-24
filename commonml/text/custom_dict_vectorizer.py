@@ -5,14 +5,63 @@ from logging import getLogger
 from commonml import es
 from commonml.utils import get_nested_value
 from scipy.sparse.construct import hstack
+from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from sklearn.feature_extraction.text import VectorizerMixin, TfidfVectorizer, \
     CountVectorizer
+from sklearn.preprocessing import LabelBinarizer
 
 import numpy as np
+import json
 
 
 logger = getLogger('commonml.text.custom_dict_vectorizer')
+
+
+class NumberPaththroughVectorizer(object):
+
+    def __init__(self, dtype):
+        self.dtype_text = dtype
+        self.vocabulary_ = ['number']
+
+    def fit(self, raw_documents):
+        pass
+
+    def transform(self, raw_documents):
+        if self.dtype_text == 'float32':
+            dtype = np.float32
+        elif self.dtype_text == 'int32':
+            dtype = np.int32
+        output = [[number] for number in raw_documents]
+        return csr_matrix(output, dtype=dtype)
+
+    def fit_transform(self, raw_documents):
+        return self.transform(self, raw_documents)
+
+    def get_feature_names(self):
+        # TODO what do i return
+        return self.vocabulary_
+
+
+class ExtendedLabelBinarizer(LabelBinarizer):
+
+    def __init__(self, neg_label=0, pos_label=1,
+                 sparse_output=False, labelindex_path=None):
+        super(ExtendedLabelBinarizer, self) \
+            .__init__(neg_label, pos_label, sparse_output)
+        self.labelindex_path = labelindex_path
+        if self.labelindex_path is not None:
+            with open(self.labelindex_path, 'r') as f:
+                self.labelindex = json.load(f)
+
+    def fit(self, y):
+        if self.labelindex_path is not None:
+            super(ExtendedLabelBinarizer, self).fit(self.labelindex)
+        else:
+            super(ExtendedLabelBinarizer, self).fit(y)
+
+    def get_feature_names(self):
+        return self.classes_
 
 
 def build_custom_vectorizer(config):
@@ -30,6 +79,10 @@ def build_custom_vectorizer(config):
             vectorizer = CountVectorizer(**vect_args)
         elif vect_type == 'tfidf':
             vectorizer = TfidfVectorizer(**vect_args)
+        elif vect_type == 'number':
+            vectorizer = NumberPaththroughVectorizer(**vect_args)
+        elif vect_type == 'label':
+            vectorizer = ExtendedLabelBinarizer(**vect_args)
         if vectorizer is not None:
             vect_rule['vectorizer'] = vectorizer
             vect_rules.append(vect_rule)
