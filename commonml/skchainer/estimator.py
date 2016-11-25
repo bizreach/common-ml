@@ -45,9 +45,11 @@ class ChainerEstimator(BaseEstimator):
         if dataset_creator is None:
             from commonml.skchainer import XyDataset
             dataset_creator = XyDataset
+            dataset = dataset_creator(X=X, y=y, model=self.model)
+        else:
+            dataset = dataset_creator(X, y)
 
         batch_size = self.batch_size
-        dataset = dataset_creator(X=X, y=y, model=self.model)
         while True:
             try:
                 dataset_iter = iterator(dataset,
