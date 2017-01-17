@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="common-ml",
-    version="0.0.9.dev1",
+    version="0.0.9",
     packages=['commonml',
               'commonml.sklearn',
               'commonml.skchainer',
