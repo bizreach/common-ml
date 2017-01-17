@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import inspect
+import types
 from logging import getLogger
 
 from chainer import cuda, optimizers, training, iterators
@@ -46,6 +47,8 @@ class ChainerEstimator(BaseEstimator):
             from commonml.skchainer import XyDataset
             dataset_creator = XyDataset
             dataset = dataset_creator(X=X, y=y, model=self.model)
+        elif isinstance(dataset_creator, types.LambdaType):
+            dataset = dataset_creator(X, y, model=self.model)
         else:
             dataset = dataset_creator(X, y)
 
@@ -83,6 +86,11 @@ class ChainerEstimator(BaseEstimator):
         if dataset_creator is None:
             from commonml.skchainer import XyDataset
             dataset_creator = XyDataset
+            dataset = dataset_creator(X, model=self.model)
+        elif isinstance(dataset_creator, types.LambdaType):
+            dataset = dataset_creator(X, model=self.model)
+        else:
+            dataset = dataset_creator(X)
 
         has_train = 'train' in inspect.getargspec(self.model.predictor.__call__).args
 
@@ -94,7 +102,6 @@ class ChainerEstimator(BaseEstimator):
 
         results = None
         batch_size = self.batch_size
-        dataset = dataset_creator(X=X, model=self.model)
         while True:
             try:
                 dataset_iter = iterator(dataset,
