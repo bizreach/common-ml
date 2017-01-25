@@ -4,7 +4,7 @@ import inspect
 import types
 from logging import getLogger
 
-from chainer import cuda, optimizers, training, iterators
+from chainer import cuda, optimizers, training, iterators, serializers
 from chainer.dataset import convert
 from chainer.training.extensions import ProgressBar
 from sklearn.base import BaseEstimator
@@ -23,6 +23,7 @@ class ChainerEstimator(BaseEstimator):
                  batch_size=100,
                  stop_trigger=(20, 'epoch'),
                  out='result',
+                 resume=None,
                  device=-1):
         if device >= 0:
             cuda.get_device(device).use()
@@ -34,6 +35,7 @@ class ChainerEstimator(BaseEstimator):
         self.batch_size = batch_size
         self.device = device
         self.out = out
+        self.resume = resume
 
     def fit(self, X, y=None,
             dataset_creator=None,
@@ -67,6 +69,9 @@ class ChainerEstimator(BaseEstimator):
                     trainer.extend(ProgressBar())
                 else:
                     extender(trainer)
+                if self.resume:
+                    serializers.load_npz(self.resume, trainer)
+                    self.resume = None
                 trainer.run()
                 break
             except RuntimeError as e:
