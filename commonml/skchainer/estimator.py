@@ -58,7 +58,7 @@ class ChainerEstimator(BaseEstimator):
         while True:
             try:
                 dataset_iter = iterator(dataset,
-                                        self.batch_size)
+                                        batch_size)
                 trainer = training.Trainer(updater(dataset_iter,
                                                    self.optimizer,
                                                    device=self.device),
@@ -110,7 +110,7 @@ class ChainerEstimator(BaseEstimator):
         while True:
             try:
                 dataset_iter = iterator(dataset,
-                                        self.batch_size)
+                                        batch_size)
                 for batch in dataset_iter:
                     in_arrays = converter(batch, self.device)
                     pred = predict_on_predictor(in_arrays[0])
