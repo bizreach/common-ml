@@ -10,7 +10,7 @@ from commonml.sklearn.estimator import ChainerEstimator
 import numpy as np
 
 
-logger = getLogger('commonml.sklearn.rnn_estimator')
+logger = getLogger(__name__)
 
 
 # experimental

@@ -5,7 +5,7 @@ from logging import getLogger
 from elasticsearch import Elasticsearch
 
 
-logger = getLogger('commonml.elasticsearch.es_analyzer')
+logger = getLogger(__name__)
 
 
 ANALYZER_CACHE = {}

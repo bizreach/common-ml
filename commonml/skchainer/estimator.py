@@ -12,7 +12,7 @@ from sklearn.base import BaseEstimator
 import numpy as np
 
 
-logger = getLogger('commonml.skchainer.estimator')
+logger = getLogger(__name__)
 
 
 class ChainerEstimator(BaseEstimator):

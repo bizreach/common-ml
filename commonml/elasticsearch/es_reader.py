@@ -8,7 +8,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 
 
-logger = getLogger('commonml.elasticsearch.es_reader')
+logger = getLogger(__name__)
 
 
 class ElasticsearchReader(object):

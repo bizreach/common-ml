@@ -15,7 +15,7 @@ import numpy as np
 import json
 
 
-logger = getLogger('commonml.text.custom_dict_vectorizer')
+logger = getLogger(__name__)
 
 
 class NumberPaththroughVectorizer(object):

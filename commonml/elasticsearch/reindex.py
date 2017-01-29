@@ -4,7 +4,7 @@ from logging import getLogger
 from elasticsearch.client import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 
-logger = getLogger('commonml.elasticsearch.reindex')
+logger = getLogger(__name__)
 
 
 def reindex(from_hosts,
@@ -57,11 +57,9 @@ def reindex(from_hosts,
                         break
                     op_index = to_index if to_index is not None else hit['_index']
                     op_type = to_type if to_type is not None else hit['_type']
-                    bulk_data.append({"index": {
-                                                "_index": op_index,
+                    bulk_data.append({"index": {"_index": op_index,
                                                 "_type": op_type,
-                                                "_id": hit['_id']
-                                                }
+                                                "_id": hit['_id']}
                                       })
                     bulk_data.append(hit['_source'])
             if len(bulk_data) != 0:

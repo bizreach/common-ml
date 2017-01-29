@@ -5,13 +5,12 @@ from logging import getLogger
 
 from chainer import Chain
 from chainer import reporter
-from chainer.functions.evaluation import accuracy
 
 import chainer.functions as F
 import numpy as np
 
 
-logger = getLogger('commonml.skchainer.regressor')
+logger = getLogger(__name__)
 
 
 class Regressor(Chain):

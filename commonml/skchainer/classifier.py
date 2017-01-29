@@ -10,7 +10,7 @@ import chainer.functions as F
 import numpy as np
 
 
-logger = getLogger('commonml.skchainer.classifier')
+logger = getLogger(__name__)
 
 
 class Classifier(Chain):

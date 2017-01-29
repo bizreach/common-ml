@@ -14,7 +14,7 @@ from commonml.sklearn.estimator import ChainerEstimator
 import numpy as np
 
 
-logger = getLogger('commonml.sklearn.auto_encoder')
+logger = getLogger(__name__)
 
 
 class AutoEncoder(BaseEstimator, VectorizerMixin):

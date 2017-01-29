@@ -9,7 +9,7 @@ from sklearn.base import BaseEstimator
 import numpy as np
 
 
-logger = getLogger('commonml.text.vocabulary_transformer')
+logger = getLogger(__name__)
 
 TOKENIZER_RE = re.compile(r"[A-Z]{2,}(?![a-z])|[A-Z][a-z]+(?=[A-Z])|[\'\w\-]+",
                           re.UNICODE)
