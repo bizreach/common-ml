@@ -9,10 +9,12 @@ import numpy as np
 def text2bitimage(text,
                   filename,
                   text_len=100,
+                  bit_size=24,
                   mode="RGB",
                   converter=lambda x: x):
     bitarray = text2bitarray(text=text,
                              text_len=text_len,
+                             bit_size=bit_size,
                              dtype=np.uint8,
                              converter=converter)
     bitarray *= 255
