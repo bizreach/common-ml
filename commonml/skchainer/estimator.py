@@ -86,7 +86,8 @@ class ChainerEstimator(BaseEstimator):
     def predict(self, X,
                 dataset_creator=None,
                 iterator=lambda x, s: iterators.SerialIterator(x, s if s < len(x) else len(x), repeat=False, shuffle=False),
-                converter=convert.concat_examples):
+                converter=convert.concat_examples,
+                post_predict=None):
 
         if dataset_creator is None:
             from commonml.skchainer import XyDataset
@@ -130,7 +131,9 @@ class ChainerEstimator(BaseEstimator):
                 continue
             break
 
-        return self.model.postpredict_y(results)
+        if post_predict is None:
+            post_predict = self.model.postpredict_y
+        return post_predict(results)
 
     def score(self, X, y, sample_weight=None):
         from commonml.skchainer.classifier import Classifier
