@@ -7,13 +7,17 @@ from logging import basicConfig, getLogger
 import yaml
 
 
-def load_config(config_file):
+def load_config(config_file, name=None):
     if config_file.endswith('.yml') or config_file.endswith('.yaml'):
         with open(config_file) as f:
-            return yaml.load(f)
+            config = yaml.load(f)
     else:
         raise ValueError('{} is unsupported'.format(config_file))
 
+    if name is None:
+        return config
+    else:
+        return dict_merge(config.get('default'), config.get(name))
 
 def dict_merge(x, y):
     merged = dict(x, **y)
