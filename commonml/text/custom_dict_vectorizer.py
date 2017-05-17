@@ -115,10 +115,13 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
         for vect_rule in self.vect_rules:
             name = vect_rule.get('name')
             vect = vect_rule.get('vectorizer')
+            weight = vect_rule.get('weight')
             if hasattr(vect, '__call__'):
                 data = vect([get_nested_str_value(x, name, '') for x in raw_documents])
             else:
                 data = vect.transform([get_nested_str_value(x, name, '') for x in raw_documents])
+            if weight:
+                data *= weight
             results.append(data)
         return hstack(results, format='csr', dtype=np.float32)
 
@@ -127,10 +130,13 @@ class CustomDictVectorizer(BaseEstimator, VectorizerMixin):
         for vect_rule in self.vect_rules:
             name = vect_rule.get('name')
             vect = vect_rule.get('vectorizer')
+            weight = vect_rule.get('weight')
             if hasattr(vect, '__call__'):
                 data = vect([get_nested_str_value(x, name, '') for x in raw_documents])
             else:
                 data = vect.fit_transform([get_nested_str_value(x, name, '') for x in raw_documents])
+            if weight:
+                data *= weight
             results.append(data)
         return hstack(results, format='csr', dtype=np.float32)
 
