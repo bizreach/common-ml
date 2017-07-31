@@ -1,9 +1,9 @@
 # coding: utf-8
 
-import inspect
 import types
 from logging import getLogger
 
+import chainer
 from chainer import cuda, optimizers, training, iterators, serializers
 from chainer.dataset import convert
 from chainer.training.extensions import ProgressBar
@@ -98,38 +98,35 @@ class ChainerEstimator(BaseEstimator):
         else:
             dataset = dataset_creator(X)
 
-        has_train = 'train' in inspect.getargspec(self.model.predictor.__call__).args
 
         def predict_on_predictor(X):
-            if has_train:
-                return self.model.predictor(X, train=False)
-            else:
-                return self.model.predictor(X)
+            return self.model.predictor(X)
 
         results = None
         batch_size = self.batch_size
         while True:
-            try:
-                dataset_iter = iterator(dataset,
-                                        batch_size)
-                for batch in dataset_iter:
-                    in_arrays = converter(batch, self.device)
-                    pred = predict_on_predictor(in_arrays[0])
-                    if results is None:
-                        results = cuda.to_cpu(pred.data)
-                    else:
-                        results = np.concatenate((results, cuda.to_cpu(pred.data)),
-                                                 axis=0)
-            except RuntimeError as e:
-                if 'out of memory' not in e.message:
-                    raise e
-                results = None
-                batch_size = int(batch_size * 0.8)
-                if batch_size == 0:
-                    raise e
-                logger.warn('Memory shortage. batch_size is changed to %d', batch_size)
-                continue
-            break
+            with chainer.using_config('train', False):
+                try:
+                    dataset_iter = iterator(dataset,
+                                            batch_size)
+                    for batch in dataset_iter:
+                        in_arrays = converter(batch, self.device)
+                        pred = predict_on_predictor(in_arrays[0])
+                        if results is None:
+                            results = cuda.to_cpu(pred.data)
+                        else:
+                            results = np.concatenate((results, cuda.to_cpu(pred.data)),
+                                                    axis=0)
+                except RuntimeError as e:
+                    if 'out of memory' not in e.message:
+                        raise e
+                    results = None
+                    batch_size = int(batch_size * 0.8)
+                    if batch_size == 0:
+                        raise e
+                    logger.warn('Memory shortage. batch_size is changed to %d', batch_size)
+                    continue
+                break
 
         if post_predict is None:
             post_predict = self.model.postpredict_y

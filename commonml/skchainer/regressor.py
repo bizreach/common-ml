@@ -1,8 +1,8 @@
 # coding: utf-8
 
-import inspect
 from logging import getLogger
 
+import chainer
 from chainer import Chain
 from chainer import reporter
 
@@ -24,18 +24,15 @@ class Regressor(Chain):
         self.y = None
         self.loss = None
         self.accuracy = None
-        self.has_train = 'train' in inspect.getargspec(self.predictor.__call__).args
         self.prefit_y = prefit_y
         self.astype_y = astype_y
         self.postpredict_y = postpredict_y
 
-    def __call__(self, x, t, train=True):
+    def __call__(self, x, t):
         self.y = None
         self.loss = None
         self.accuracy = None
-        if self.has_train:
-            self.y = self.predictor(x, train=train)
-        else:
+        with chainer.using_config('train', True):
             self.y = self.predictor(x)
         self.loss = self.lossfun(self.y, t)
         reporter.report({'loss': self.loss}, self)
