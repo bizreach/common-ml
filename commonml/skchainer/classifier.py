@@ -1,8 +1,8 @@
 # coding: utf-8
 
-import inspect
 from logging import getLogger
 
+import chainer
 from chainer import Chain
 from chainer import reporter
 
@@ -21,28 +21,18 @@ class Classifier(Chain):
         super(Classifier, self).__init__(predictor=predictor)
         self.lossfun = lossfun
         self.accfun = accfun
-        self.y = None
-        self.loss = None
-        self.accuracy = None
-        self.has_train = 'train' in inspect.getargspec(self.predictor.__call__).args
         self.prefit_y = prefit_y
         self.astype_y = astype_y
         self.postpredict_y = postpredict_y
 
-    def __call__(self, x, t, train=True):
-        self.y = None
-        self.loss = None
-        self.accuracy = None
-        if self.has_train:
-            y = self.predictor(x, train=train)
-        else:
-            y = self.predictor(x)
-        self.loss = self.lossfun(y, t)
-        reporter.report({'loss': self.loss}, self)
+    def __call__(self, x, t):
+        y = self.predictor(x)
+        loss = self.lossfun(y, t)
+        reporter.report({'loss': loss}, self)
         if self.accfun is not None:
-            self.accuracy = self.accfun(self.y, t)
-            reporter.report({'accuracy': self.accuracy}, self)
-        return self.loss
+            accuracy = self.accfun(y, t)
+            reporter.report({'accuracy': accuracy}, self)
+        return loss
 
 
 def softmax_classifier(predictor, accfun=None):
