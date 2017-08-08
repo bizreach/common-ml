@@ -98,10 +98,6 @@ class ChainerEstimator(BaseEstimator):
         else:
             dataset = dataset_creator(X)
 
-
-        def predict_on_predictor(X):
-            return self.model.predictor(X)
-
         results = None
         batch_size = self.batch_size
         while True:
@@ -111,7 +107,7 @@ class ChainerEstimator(BaseEstimator):
                                             batch_size)
                     for batch in dataset_iter:
                         in_arrays = converter(batch, self.device)
-                        pred = predict_on_predictor(in_arrays[0])
+                        pred = self.model.predictor(in_arrays[0])
                         if results is None:
                             results = cuda.to_cpu(pred.data)
                         else:
