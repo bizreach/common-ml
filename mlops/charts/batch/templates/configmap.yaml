@@ -1,0 +1,17 @@
+{{ if or (eq .Values.mode "webhook") (eq .Values.mode "calendar") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-{{ .Values.mode }}-gateway-configmap"
+  namespace: argo-events
+data:
+{{ if (eq .Values.mode "webhook") }}
+  webhook.workflowConfig: |-
+    port: "{{ .Values.webhook.port }}"
+    endpoint: "/{{ .Release.Name }}"
+    method: "{{ .Values.webhook.method | default "POST" }}"
+{{ else if (eq .Values.mode "calendar") }}
+  calendar.workflowConfig: |-
+{{ toYaml .Values.calendar | indent 4 }}
+{{ end }}
+{{ end }}

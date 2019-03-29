@@ -1,0 +1,35 @@
+{{ if or (eq .Values.mode "webhook") (eq .Values.mode "calendar") }}
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: "{{ .Release.Name }}-{{ .Values.mode }}-sensor"
+  namespace: argo-events
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  dependencies:
+    - name: "{{ .Release.Name }}-{{ .Values.mode }}-gateway:{{ .Values.mode }}.workflowConfig"
+  triggers:
+    - name: {{ .Values.mode }}-workflow-trigger
+      resource:
+        namespace: {{ .Values.namespace | default "argo-events" }}
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+{{- include "workflow" . | indent 12 }}
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor:v0.7"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+    tolerations:
+      - key: "node-role.kubernetes.io/master"
+        effect: "NoSchedule"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+{{ end }}

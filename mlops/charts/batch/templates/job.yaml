@@ -1,0 +1,6 @@
+{{ if .Values.argocd }}
+{{ if or (eq .Values.env "AWS") (eq .Values.env "aws") }}
+---
+{{- include "aws.jobs" . }}
+{{ end }}
+{{ end }}
