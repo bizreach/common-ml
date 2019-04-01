@@ -1,0 +1,105 @@
+##################################################
+# Environment settings
+##################################################
+
+# environment. local or aws are available.
+env: aws
+
+# aws settings
+aws:
+  instanceType: t3.small
+  spotPrice: "0.008"
+  volumeSize: "8"
+  access_key: null
+  secret_access_key: null
+
+argocd: false
+
+##################################################
+# Deployment settings
+##################################################
+
+# workflow or webhook or calendar
+mode: workflow
+
+# only valid for webhook mode
+webhook:
+  port: "12000"
+
+# only valid for calendar mode
+# you must specify "schedule" or "interval" when you use calendar mode.
+# "schedule" takes precedence over "interval".
+calendar:
+  schedule: "*/30 * * * *"
+  interval: 30m
+
+# notify
+notify:
+  hookUrl: "https://example.com/bizreach/common-ml/slack/notify"
+  iconEmoji: null
+
+##################################################
+# Application settings
+##################################################
+
+# argo workflow
+# from https://github.com/argoproj/argo/blob/master/examples/README.md#steps
+containerSteps:
+- - name: hello1            # hello1 is run before the following steps
+    template: whalesay
+    arguments:
+      parameters:
+      - name: message
+        value: "hello1"
+- - name: hello2a           # double dash => run after previous step
+    template: whalesay
+    arguments:
+      parameters:
+      - name: message
+        value: "hello2a"
+  - name: hello2b           # single dash => run in parallel with previous step
+    template: whalesay
+    arguments:
+      parameters:
+      - name: message
+        value: "hello2b"
+
+# container definitions.
+containerTemplates:
+- name: whalesay
+  inputs:
+    parameters:
+    - name: message
+  container:
+    image: docker/whalesay
+    command: [cowsay]
+    args: ["{{inputs.parameters.message}}"]
+
+# environment variables
+# see following example
+#
+#   env:
+#   - name: AWS_ACCESS_KEY_ID
+#     value: hogehoge
+#   - name: AWS_SECRET_ACCESS_KEY
+#     value: fugafuga
+#
+# commonEnvVar is available all steps
+commonEnvVar: []
+
+envVar:
+- name: hello1
+  env: []
+- name: hello2a
+  env: []
+- name: hello2b
+  env: []
+
+# active deadline per step
+activeDeadlineSeconds: 600
+
+# volume setting
+volumes: []
+
+# data IO
+workflow_creation_date: "{{workflow.creationTimestamp.Y}}/{{workflow.creationTimestamp.m}}/{{workflow.creationTimestamp.d}}"
